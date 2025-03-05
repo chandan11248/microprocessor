@@ -1,0 +1,92 @@
+8085 Microprocessor Cheat Sheet
+
+1. Instruction Set Overview
+
+Data Transfer Instructions
+MOV Rd, Rs
+Use: Copy data from source register Rs to destination register Rd.
+MVI R, data8
+Use: Load an 8‑bit immediate value into register R.
+LXI rp, data16
+Use: Load a 16‑bit immediate value into register pair rp (BC, DE, HL, or SP).
+LDA addr
+Use: Load accumulator A with the byte from memory at address addr.
+STA addr
+Use: Store the content of accumulator A into memory at address addr.
+LHLD addr / SHLD addr
+Use: Load/store registers H and L from/to two consecutive memory locations.
+LDAX rp / STAX rp
+Use: Load/store accumulator A using the address held in register pair B or D.
+XCHG, PCHL, XTHL
+Use: Exchange registers or move addresses for branch control and stack manipulation.
+Arithmetic Instructions
+ADD/ADI, ADC/ACI
+Use: Perform addition operations with registers or immediate data.
+SUB/SUI, SBB/SBI
+Use: Perform subtraction operations with registers or immediate data.
+INR, DCR, INX, DCX
+Use: Increment or decrement registers and register pairs.
+DAD
+Use: Add a register pair to HL.
+DAA
+Use: Adjust the accumulator for BCD (Binary Coded Decimal) addition.
+Logical Instructions
+ANA/ANI, ORA/ORI, XRA/XRI
+Use: Perform bitwise logical operations on the accumulator.
+CMP/CPI
+Use: Compare the accumulator with a register or immediate data.
+CMA, CMC, STC
+Use: Complement the accumulator or the carry flag.
+Branching Instructions
+JMP, CALL, RET
+Use: Unconditionally or conditionally branch or call subroutines.
+Conditional Variants (JZ, JNZ, JC, JNC, etc.)
+Use: Branch based on flag status (zero, carry, sign, parity).
+RST n
+Use: Call fixed address routines (software interrupts).
+Stack & I/O Instructions
+PUSH/POP
+Use: Store or retrieve register pairs from the stack.
+IN/OUT
+Use: Read from or write to I/O ports.
+Control & Shift Instructions
+NOP, HLT
+Use: No operation or halt the microprocessor.
+DI, EI, SIM, RIM
+Use: Manage interrupts and serial I/O.
+RLC, RRC, RAL, RAR
+Use: Rotate the bits of the accumulator (with/without carry).
+2. Addressing Modes
+
+The 8085 uses various addressing modes to access operands. Understanding these is key to writing efficient assembly code.
+
+Immediate Addressing
+Description: The operand is directly specified within the instruction.
+Example:
+MVI A, 3Eh (Load accumulator A with the immediate value 3Eh)
+ADI 05h (Add immediate value 05h to A)
+Use: Quick loading of constant values.
+Register Addressing
+Description: The operand is located in a register.
+Example:
+MOV A, B (Copy content of register B into A)
+ADD C (Add content of register C to A)
+Use: Fast data manipulation since no memory access is needed.
+Direct Addressing
+Description: The memory address of the operand is explicitly given in the instruction.
+Example:
+LDA 2050h (Load A with the content from memory location 2050h)
+STA 2050h (Store A’s content into memory location 2050h)
+Use: Access a specific memory location directly.
+Indirect Addressing
+Description: The instruction uses a register pair to hold the memory address where the operand is stored.
+Example:
+MOV A, M (Here, HL points to the memory location, and its content is moved to A)
+LDAX B (Load A from the memory address specified by register pair B–C)
+Use: Allows for flexible data access through pointers.
+Implicit Addressing
+Description: The operand is implied by the instruction itself; no explicit operand is mentioned.
+Example:
+CMA (Complement the accumulator – A is implicitly used)
+HLT (Halt instruction, which implicitly operates on the microprocessor’s state)
+Use: Simplifies instructions where the operand is fixed (e.g., the accumulator or status flags).
