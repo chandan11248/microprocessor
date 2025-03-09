@@ -1,72 +1,77 @@
-.model small
-.stack 100h
+.MODEL SMALL
+.STACK 100H
+.DATA
+    PROMPT      DB 'Enter a string: $'
+    BUFFER      DB 100          ; Max input length
+                DB ?           ; Actual input length
+                DB 100 DUP('$') ; Input storage
 
-.data
-    prompt      db 'Enter a string: $'
-    buffer      db 50              ; Maximum input length
-                db 0               ; Actual input length
-                db 50 dup(0)       ; Input buffer
-    end_marker  db '$'             ; String terminator
+.CODE
+MAIN PROC
+    ; Initialize data segment
+    MOV AX, @DATA
+    MOV DS, AX
 
-.code
-start:
-    mov ax, @data
-    mov ds, ax
+    ; Clear the entire screen with blue background
+    MOV AX, 0600H     ; AH=06h (scroll up), AL=00h (full screen)
+    MOV BH, 17H       ; Attribute: blue background (1), white text (7)
+    MOV CX, 0000H     ; Upper-left corner (0,0)
+    MOV DX, 184FH     ; Lower-right corner (24,79)
+    INT 10H
 
-    ; Display input prompt
-    mov ah, 09h
-    lea dx, prompt
-    int 21h
+ MOV AX, 0600H     ; AH=06h (scroll up), AL=00h (full screen)
+    MOV BH, 07H       ; Attribute: black background (0), white text (7)
+    MOV CX, 030AH     ; Upper-left corner (row 3, column 10)
+    MOV DX, 184FH     ; Lower-right corner (row 21, column 10)
+    INT 10H
+    
+   
+
+    ; Display prompt
+    MOV AH, 09H
+    LEA DX, PROMPT
+    INT 21H
 
     ; Read string input
-    mov ah, 0Ah
-    lea dx, buffer
-    int 21h
+    MOV AH, 0AH
+    LEA DX, BUFFER
+    INT 21H
 
-    ; Convert to lowercase
-    lea si, buffer + 2            ; Start of string
-    mov cl, [buffer + 1]          ; String length
-    mov ch, 0
-    jcxz display                  ; Skip if empty string
+    ; Process string to convert to lowercase
+    LEA SI, BUFFER + 2  ; Point to start of string
+    MOV CL, [BUFFER + 1] ; Get actual input length
+    MOV CH, 0           ; Clear CH (CX = CL)
+    JCXZ DISPLAY_RESULT ; Skip if empty string
 
-convert_loop:
-    cmp byte ptr [si], 'A'        ; Check uppercase range
-    jb skip
-    cmp byte ptr [si], 'Z'
-    ja skip
-    add byte ptr [si], 20h        ; Convert to lowercase
-skip:
-    inc si
-    loop convert_loop
+CONVERT_TO_LOWER:
+    MOV AL, [SI]        ; Load character into AL
+    CMP AL, 'A'
+    JB  NEXT_CHAR       ; Skip if character < 'A'
+    CMP AL, 'Z'
+    JA  NEXT_CHAR       ; Skip if character > 'Z'
+    ADD AL, 32          ; Convert uppercase to lowercase
+    MOV [SI], AL        ; Store modified character
+NEXT_CHAR:
+    INC SI              ; Move to next character
+    LOOP CONVERT_TO_LOWER ; Repeat for all characters
 
-display:
-    ; Replace carriage return with terminator
-    mov bl, [buffer + 1]
-    mov bh, 0
-    mov [buffer + 2 + bx], '$'
 
-    ; Set video mode (80x25 text)
-    mov ax, 0003h
-    int 10h
 
-    ; Set cursor to lower-left corner (1-based: 21,10 -> 0-based: 20,9)
-    mov ah, 02h
-    mov bh, 0                     ; Page 0
-    mov dh, 20                    ; Row 21 (0-based row 20)
-    mov dl, 9                     ; Column 10 (0-based column 9)
-    int 10h
+DISPLAY_RESULT:
+    ; Set cursor position (row 21, column 10)
+    MOV AH, 02H
+    MOV BH, 00H      ; Page 0
+    MOV DH, 21       ; Row 21
+    MOV DL, 10       ; Column 10
+    INT 10H
 
-    ; Display converted string
-    mov ah, 09h
-    lea dx, buffer + 2
-    int 21h
+    ; Display modified string
+    MOV AH, 09H
+    LEA DX, BUFFER + 2
+    INT 21H
 
-    ; Wait for key press
-    mov ah, 00h
-    int 16h
-
-    ; Return to DOS
-    mov ax, 4C00h
-    int 21h
-
-end start
+    ; Exit program
+    MOV AH, 4CH
+    INT 21H
+MAIN ENDP
+END MAIN
